@@ -1,4 +1,4 @@
-# event-management-microservice
+# event-reservation-microservice
 ## Install Django:
 * $ pip install django
 
