@@ -13,7 +13,7 @@ from django.contrib.auth import authenticate, login
 from threading import Thread
 from random import randint
 import serial
-import os, time, datetime
+import datetime
 
 
 def index(request):
@@ -53,19 +53,23 @@ def tickets(request):
 
 class UserLoginAPIView(APIView):
     permission_classes = [AllowAny]
-    template_name = 'tickets/get_tickets.html'  # ?
+    template_name = 'tickets/get_tickets.html'
+    invalid_login = "Invalid username or password"
 
     def post(self, request):
         data = request.data
         serializer = UserLoginSerializer(data=data)
-        if serializer.is_valid(raise_exception=True):
+        if serializer.is_valid():
             new_data = serializer.data
             username = request.POST["username"]
             password = request.POST["password"]
             user = authenticate(request, username=username, password=password)
-            login(request, user=user)
-            return render(request, self.template_name, new_data, status=HTTP_200_OK)
-        return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
+            if user is not None:
+                login(request, user=user)
+                return render(request, self.template_name, new_data, status=HTTP_200_OK)
+            else:
+                return render_to_response('login/login_page.html', {"message": self.invalid_login})
+        return render_to_response('login/login_page.html', {"message": self.invalid_login})
 
 
 @api_view(['GET'])
@@ -204,7 +208,7 @@ def order_tickets(request):
         print(username)
         mobile_number = get_user_mobile_number(username)
         if mobile_number:
-            thread = Thread(target=send_message, args=(username, mobile_number ))
+            thread = Thread(target=send_message, args=(username, mobile_number))
             thread.start()
             return Response({"status": HTTP_200_OK})
     return Response({"status": HTTP_500_INTERNAL_SERVER_ERROR})
@@ -215,11 +219,11 @@ def refresh(request):
     if request.user.is_authenticated:
         username = request.user.username
         can_refresh = is_refreshable(username=username)
-        if can_refresh:
-            timer = send_message_timer(username=username)
-            if timer:
-                send_message(username=username)
-                return Response({"status": HTTP_200_OK, "message": "Message has been send again"})
+        timer = send_message_timer(username=username)
+        mobile_number = get_user_mobile_number(username)
+        if can_refresh and timer and mobile_number:
+            send_message(username=username, mobile_number=mobile_number)
+            return Response({"status": HTTP_200_OK, "message": "Message has been send again"})
     return Response({"status": HTTP_304_NOT_MODIFIED, "message": "Message can be send again after 30s"})
 
 

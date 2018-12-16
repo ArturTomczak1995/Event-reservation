@@ -1,19 +1,20 @@
-var frm = $('login-form');
-frm.submit(function (e) {
-    e.preventDefault();
+$("#login").click(function () {
+    var form = $('.login-form');
     $.ajax({
-        type: frm.attr('method'),
-        url: frm.attr('action'),
-        data: frm.serialize(),
+        type: "POST",
+        url: "buy",
+        dataType: 'json',
+        data: form.serialize(),
         success: function (data) {
-            if (data.result === false) {
-                $("#answer").html('<p1>' + data.message + '</p1><br>').css("color", "red").animate("slow");
+            if(data.status === 200){
+                $(this).unbind('submit').submit()
             }
-            console.log(data);
+            $("#answer").html('<p1>' + data.message + '</p1><br>').css("color", "red").animate("slow");
+            console.log(data)
         },
         error: function (data) {
-            console.log('An error occurred.');
-            console.log(data);
+            console.log('error');
+            console.log(data)
         }
     });
 });
