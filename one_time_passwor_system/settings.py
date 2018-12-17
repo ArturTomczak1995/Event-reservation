@@ -76,16 +76,10 @@ WSGI_APPLICATION = 'one_time_passwor_system.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'tickets_users_db',
-        'HOST': '127.0.0.1',
-        'PORT': '3306',
-        'USER': 'root_tickets',
-        'PASSWORD': 'Database223344',
-        'OPTIONS': {
-            'charset': 'utf8mb4',
-        },
-    }}
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/2.0/ref/settings/#auth-password-validators
