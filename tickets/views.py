@@ -1,5 +1,6 @@
+from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
-from django.shortcuts import render, render_to_response
+from django.shortcuts import render, render_to_response, redirect
 from rest_framework.decorators import api_view
 from rest_framework.permissions import AllowAny
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_500_INTERNAL_SERVER_ERROR, \
@@ -9,13 +10,16 @@ from .models import Concerts, SendMessageAgain, User, MessageStatus, Authorizati
 from .serializers import MobileNumberSerializer, UserSerializer, UserLoginSerializer, \
     AuthorizationCodeSerializer
 from rest_framework.response import Response
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from threading import Thread
 from random import randint
 import serial
 import datetime
 import requests
 import json
+from django.contrib.auth import logout as django_logout
+from django.http import HttpResponseRedirect
+
 
 ip_events = "https://raw.githubusercontent.com"
 get_events_path = "/ArturTomczak1995/just_json/master/response.json"
@@ -300,3 +304,12 @@ class AdminAuthorizeAPIView(APIView):
                 if user.has_perm('tickets'):
                     return Response({"status": 200, "result": True}, status=HTTP_200_OK)
         return Response({"status": 200, "result": False, "message": "Permission denied"}, status=HTTP_200_OK)
+
+
+class UserLogOutAPIView(APIView):
+    template_name = 'login/login_page.html'
+
+    @login_required
+    def get_logout(self, request):
+        django_logout(request)
+        return HttpResponseRedirect(self.template_name)

@@ -42,7 +42,7 @@
                     {% if user.is_authenticated %}
                         <a class="dropdown-item" href="#">Profile</a>
 
-                        <a class="dropdown-item" href="#">Log out</a>
+                        <a class="dropdown-item" href="{% url 'logout' %}">Log out</a>
                     {% else %}
                         <a class="dropdown-item" href="#">Log in</a>
                         <a class="dropdown-item" href="#">Register</a>

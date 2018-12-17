@@ -1,5 +1,5 @@
 from django.urls import path
-from tickets.views import UserLoginAPIView, AdminAuthorizeAPIView
+from tickets.views import UserLoginAPIView, AdminAuthorizeAPIView, UserLogOutAPIView
 from . import views
 
 urlpatterns = [
@@ -14,6 +14,7 @@ urlpatterns = [
     path('tickets/buy/buy_tickets/cancel', views.cancel, name='cancel'),
     path('tickets/buy/buy_tickets/authorize', views.authorize, name='authorize'),
     path('admin_authorization', AdminAuthorizeAPIView.as_view(), name='admin_authorize'),
+    path('logout', UserLogOutAPIView.as_view(), name='logout')
 
 ]
 
