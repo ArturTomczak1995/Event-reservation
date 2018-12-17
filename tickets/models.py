@@ -13,7 +13,7 @@ class MobileNumber(models.Model):
 class Concerts(models.Model):
     date = models.DateField()
     location = models.CharField(max_length=100)
-    band = models.CharField(max_length=100)
+    event_type = models.CharField(max_length=100)
     price = models.IntegerField()
     seats_total = models.IntegerField(default=0)
     seats_left = models.IntegerField(default=0)

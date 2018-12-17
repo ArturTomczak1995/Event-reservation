@@ -6,7 +6,7 @@ from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_500_IN
     HTTP_304_NOT_MODIFIED
 from rest_framework.views import APIView
 from .models import Concerts, SendMessageAgain, User, MessageStatus, AuthorizationCode, MobileNumber
-from .serializers import MobileNumberSerializer, UserSerializer, UserLoginSerializer, ConcertsSerializer, \
+from .serializers import MobileNumberSerializer, UserSerializer, UserLoginSerializer, \
     AuthorizationCodeSerializer
 from rest_framework.response import Response
 from django.contrib.auth import authenticate, login
@@ -14,6 +14,11 @@ from threading import Thread
 from random import randint
 import serial
 import datetime
+import requests
+import json
+
+ip_events = "https://raw.githubusercontent.com"
+get_events_path = "/ArturTomczak1995/just_json/master/response.json"
 
 
 def index(request):
@@ -64,6 +69,7 @@ class UserLoginAPIView(APIView):
             username = request.POST["username"]
             password = request.POST["password"]
             user = authenticate(request, username=username, password=password)
+            print(user, username, password)
             if user is not None:
                 login(request, user=user)
                 return render(request, self.template_name, new_data, status=HTTP_200_OK)
@@ -73,12 +79,14 @@ class UserLoginAPIView(APIView):
 
 
 @api_view(['GET'])
-def concerts(request):
-    try:
-        reservations = Concerts.objects.all().order_by("date")
-        serializer = ConcertsSerializer(reservations, many=True)
-        return Response(serializer.data)
-    except ValueError:
+def get_events(request):
+    url = ip_events + get_events_path
+    serialized_data = requests.get(url)
+    data = json.loads(serialized_data.text)
+    events = data["events"]
+    if serialized_data.status_code == 200:
+        return Response(events)
+    else:
         return Response({"status": HTTP_500_INTERNAL_SERVER_ERROR})
 
 
@@ -155,18 +163,18 @@ def send_message(username, mobile_number):
     send_message_timer(username)
     set_message_status(username, "sending")
     port = serial.Serial("COM4", baudrate=9600, timeout=1)
-    port.write(str.encode('AT'+'\r\n'))
+    port.write(str.encode('AT' + '\r\n'))
     rcv = port.read(10)
-    port.write(str.encode('ATE0'+'\r\n'))
-    rcv = port.read(10)
-    print(rcv)
-    port.write(str.encode('AT+CMGF=1'+'\r\n'))
+    port.write(str.encode('ATE0' + '\r\n'))
     rcv = port.read(10)
     print(rcv)
-    port.write(str.encode('AT+CNMI=2,1,0,0,0'+'\r\n'))
+    port.write(str.encode('AT+CMGF=1' + '\r\n'))
     rcv = port.read(10)
     print(rcv)
-    port.write(str.encode('AT+CMGS="+48' + str(mobile_number) + '"'+'\r\n'))
+    port.write(str.encode('AT+CNMI=2,1,0,0,0' + '\r\n'))
+    rcv = port.read(10)
+    print(rcv)
+    port.write(str.encode('AT+CMGS="+48' + str(mobile_number) + '"' + '\r\n'))
     rcv = port.read(10)
     print(rcv)
     port.write(str.encode('Your authorization code is: ' + authorization_code + '\r\n'))
@@ -197,6 +205,7 @@ def get_user_mobile_number(username):
         return mobile_number.mobile_number
     except ObjectDoesNotExist:
         return False
+
 
 @api_view(['GET'])
 def order_tickets(request):
@@ -275,3 +284,19 @@ def authorize(request):
                 set_message_status(username=username, status="sold")
                 return Response({"status": HTTP_200_OK, "message": "Tickets booked"})
     return Response({"status": HTTP_400_BAD_REQUEST, "message": "Input code is invalid"})
+
+
+class AdminAuthorizeAPIView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        data = request.data
+        serializer = UserLoginSerializer(data=data)
+        if serializer.is_valid():
+            username = request.data["username"]
+            password = request.data["password"]
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                if user.has_perm('tickets'):
+                    return Response({"status": 200, "result": True}, status=HTTP_200_OK)
+        return Response({"status": 200, "result": False, "message": "Permission denied"}, status=HTTP_200_OK)

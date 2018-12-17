@@ -18,7 +18,7 @@ frm.submit(function (e) {
                 $('form').animate({height: "toggle", opacity: "toggle"}, "slow");
             }
             else {
-                if (Object.keys(data.message)[0] === "username"){
+                if (Object.keys(data.message)[0] === "username") {
                     $("#answer").html('<p1>' + data.message[Object.keys(data.message)[0]] + '</p1><br>').css("color", "red").animate("slow");
                 }
             }
@@ -30,4 +30,3 @@ frm.submit(function (e) {
         }
     });
 });
-

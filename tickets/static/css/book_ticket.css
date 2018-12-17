@@ -1,8 +1,8 @@
-#concerts-table #thead-tickets{
+#concerts-table #thead-tickets {
     margin: auto;
 }
 
-#authorization-message-end-button{
+#authorization-message-end-button {
     width: 220px;
     height: 45px;
 }
@@ -13,16 +13,16 @@
     margin: auto;
 }
 
-body{
+body {
     /*color: white;*/
     background: white;
 }
 
-.book-tickets-row td:hover{
+.book-tickets-row td:hover {
     background-color: yellow;
 }
 
-#center-buy_ticket-container {
+.tickets-container {
     display: none;
     position: fixed;
     top: 50%;
@@ -45,7 +45,7 @@ body{
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0,0,0,0.5);
+    background-color: rgba(0, 0, 0, 0.5);
     z-index: 2;
     cursor: pointer;
 }
@@ -58,68 +58,69 @@ body{
     text-align: center;
 }
 
-#accept-form-button, #cancel-form-button{
+#accept-form-button, #cancel-form-button {
     width: 220px;
     height: 45px;
 }
 
-
-#buy_ticket-container {
+#buy_ticket-container, #details-container {
     background: white;
     color: black;
-    border-radius: 15px
+    border-radius: 15px;
 }
 
-#buy-ticket-form-number{
+#buy-ticket-form-number {
     margin-left: auto;
     margin-right: auto;
-    display:inline-block;
+    display: inline-block;
 }
 
-#ticket-number, #add-ticket, #remove-ticket{
+#ticket-number, #add-ticket, #remove-ticket {
     text-align: center;
     width: 45px;
     height: 45px;
     float: left;
     margin: 10px;
 }
-#ticket-number{
+
+#ticket-number {
     font-size: 30px;
 }
 
-#enter-authorization-code, #seats-chosen{
+#enter-authorization-code, #seats-chosen {
     /*margin-top: 10px;*/
     display: none;
 }
 
-#enter-authorization-code{
+#enter-authorization-code {
     text-align: center;
 }
 
-.auth-code{
+.auth-code {
     margin: 10px;
 }
 
-#accept-code-button{
+#accept-code-button, .order {
     width: 220px;
     height: 45px;
 }
 
-#resend-code-button, #cancel-code-button{
+#resend-code-button, #cancel-code-button {
     width: 100px;
     height: 40px;
 }
-#buy-tickets-text{
+
+#buy-tickets-text {
     padding-top: 10px;
     width: 100%;
     text-align: center;
 }
 
-#authorization-message{
+#authorization-message {
     padding-bottom: 20px;
 }
 
-#authorization-message-end{
+#authorization-message-end {
     display: none;
     text-align: center;
     width: 100%;
@@ -127,12 +128,16 @@ body{
     padding-bottom: 15px;
 }
 
-.padding{
+.padding {
     padding-bottom: 10px;
 }
 
-#message{
+#message {
     display: none;
     text-align: center;
     padding: 15px;
+}
+
+#details-container-data {
+    padding-bottom: 10px;
 }

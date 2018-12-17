@@ -1,10 +1,21 @@
 var row_number;
+var details_arr = [];
+var all_details = "";
+
 
 function display_concerts(data) {
     for (var i = 0; i < data.length; i++) {
         var id_number = i + 1;
         var row = "<td class='book-tickets-row'>" + id_number + "</td>";
         for (var x in data[i]) {
+            if (x === "details") {
+                // for (var detail_info in x["details"]){
+                details_arr.push(data[i]);
+
+                // }
+                row += "<td><button class='btn btn-info show-details-btn' type='submit' onclick=\"detail(" + i + ")\">Details</button></td>";
+                break;
+            }
             row += '<td id="' + x + "-" + i + '">' + data[i][x] + '</td>';
         }
         var tr_id = "ticket-table-row-" + i;
@@ -17,7 +28,30 @@ function display_concerts(data) {
 }
 
 
-function get_concerts(){
+function printValues(obj) {
+    for (var key in obj) {
+        if (typeof obj[key] === "object") {
+            printValues(obj[key]);
+        } else {
+            if (key !== "undefined") {
+                all_details += "<b>" + key + "</b>" + ": " + obj[key] + "<br>";
+            }
+        }
+    }
+}
+
+function detail(i) {
+    all_details = "";
+    $("#overlay").animate({opacity: "toggle"}, "slow").show();
+    var obj = details_arr[i];
+    printValues(obj);
+    $("#information").html(all_details);
+    $("#details-container-data").html('<button id="order-tickets-button" class="btn btn-success order" onclick="on(' + i + ')">buy</button>');
+    $("#center-details-container").animate({opacity: "toggle"}, "slow").show();
+}
+
+
+function get_concerts() {
     $.ajax({
         type: "GET",
         url: "login/concerts",
@@ -39,8 +73,8 @@ $(document).ready(function (e) {
 function ticket_details() {
     $("#buy_ticket-container-data").html("<p1>" +
         "Date: " + $("#date-" + row_number).text() +
-        "<br>Location: " + $("#location-" + row_number).text() +
-        "<br>Band: " + $("#band-" + row_number).text() +
+        "<br>Location: " + $("#Location-" + row_number).text() +
+        "<br>Event Type: " + $("#event_type-" + row_number).text() +
         "<br>Price: $" + $("#price-" + row_number).text() +
         "<br>Seats Left: " + $("#seats_left-" + row_number).text() + "</p1>");
 }
@@ -94,11 +128,11 @@ function authorize_order() {
     });
 }
 
-function accept_tickets(){
+function accept_tickets() {
     authorize_order();
     $("#seats_ordered").val(seats_field());
     $("#date_order").val($("#date-" + row_number).text());
-    $("#band_order").val($("#band-" + row_number).text());
+    $("#event_type_order").val($("#event_type-" + row_number).text());
     $("#buy-ticket-form").hide();
     $("#seats-chosen").html("<p2> Number of seats: " + seats_field() + "" +
         "<br> Price Total: $" + price_total() + "</p2>").show();
@@ -114,7 +148,6 @@ function remove_ticket() {
 }
 
 
-
 $("#accept-code-button").click(function (e) {
     e.preventDefault();
     var form = $('#authorization-form');
@@ -125,7 +158,7 @@ $("#accept-code-button").click(function (e) {
         dataType: 'json',
         data: form.serialize(),
         success: function (data) {
-            if(data.status === 200){
+            if (data.status === 200) {
                 $("#enter-authorization-code").hide();
                 $("#message").html(data.message).css({"color": "green"}).show();
                 $("#authorization-message-end").animate({opacity: "toggle"}, "slow").show();
@@ -148,7 +181,7 @@ $("#resend-code-button").click(function (e) {
         type: "GET",
         url: "tickets/buy/buy_tickets/refresh",
         success: function (data) {
-            if(data.status === 200){
+            if (data.status === 200) {
                 $("#message").html(data.message).css({"color": "green"}).show();
             }
             else {
@@ -182,16 +215,20 @@ function on(i) {
     $("#authorization-message-end").hide();
     $("#enter-authorization-code").hide();
     $("#seats-chosen").hide();
+    $("#center-details-container").hide();
 
     $("#input-authorization-code").val("");
     $("#ticket-number").html(1);
     $("#buy-ticket-form").css({"display": "block"});
-    $("#overlay").animate({opacity: "toggle"}, "slow").show();
+    if ($("#overlay").css("display") === "none") {
+        $("#overlay").animate({opacity: "toggle"}, "slow").show();
+    }
     $("#center-buy_ticket-container").animate({opacity: "toggle"}, "slow").show();
 }
 
 function off() {
     $("#message").hide();
     $("#overlay").hide();
+    $("#center-details-container").hide();
     $("#center-buy_ticket-container").hide();
 }

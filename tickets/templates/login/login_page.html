@@ -5,9 +5,7 @@
 {% block stylesheet %}
     <link rel="stylesheet" type="text/css" href="{% static 'css/login.css' %}">
 {% endblock %}
-
 {% block content %}
-
     <div class="login-page">
         <div class="form">
             <div id="answer">
@@ -24,7 +22,8 @@
                 <button type="submit" id="register-form-create">create</button>
                 <p class="message">Already registered? <a href="#">Sign In</a></p>
             </form>
-            <form class="login-form" action="http://127.0.0.1:8000/tickets/buy" method="post" enctype="multipart/form-data">
+            <form class="login-form" action="http://127.0.0.1:8000/tickets/buy" method="post"
+                  enctype="multipart/form-data">
                 {% csrf_token %}
                 <input type="text" placeholder="Login" name="username" required/>
                 <input type="password" placeholder="Password" name="password" required/>

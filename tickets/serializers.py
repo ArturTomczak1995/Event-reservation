@@ -2,7 +2,7 @@ from django.db.models import Q
 from rest_framework import serializers
 from .models import *
 from django.core.exceptions import ValidationError
-from rest_framework.serializers import CharField, IntegerField
+from rest_framework.serializers import CharField
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -56,14 +56,12 @@ class UserLoginSerializer(serializers.ModelSerializer):
 
 
 class ConcertsSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Concerts
         fields = ["date", "location", "band", "price", "seats_left"]
 
 
 class AuthorizationCodeSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = AuthorizationCode
         fields = '__all__'
