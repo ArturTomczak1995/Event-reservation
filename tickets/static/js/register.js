@@ -10,7 +10,6 @@ frm.submit(function (e) {
         type: frm.attr('method'),
         url: frm.attr('action'),
         dataType: 'json',
-        contentType: "application/json; charset=utf-8",
         data: frm.serialize(),
         success: function (data) {
             if (data.result === true) {
