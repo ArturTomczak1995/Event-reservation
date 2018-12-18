@@ -1,6 +1,6 @@
-from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
-from django.shortcuts import render, render_to_response, redirect
+from django.http import HttpResponse
+from django.shortcuts import render, render_to_response
 from rest_framework.decorators import api_view
 from rest_framework.permissions import AllowAny
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_500_INTERNAL_SERVER_ERROR, \
@@ -17,8 +17,6 @@ import serial
 import datetime
 import requests
 import json
-from django.contrib.auth import logout as django_logout
-from django.http import HttpResponseRedirect
 
 
 ip_events = "https://raw.githubusercontent.com"
@@ -27,6 +25,10 @@ get_events_path = "/ArturTomczak1995/just_json/master/response.json"
 
 def index(request):
     return render(request, 'login/login_page.html')
+
+
+def buy_tickets_page(request):
+    return render(request, 'tickets/get_tickets.html')
 
 
 def get_users(model, username):
@@ -53,11 +55,6 @@ def create_user(create_user_request):
         return Response({"status": 200, "result": True, "message": "Account created successfully."})
     else:
         return Response({"status": 200, "result": False, "message": user_serializer.errors})
-
-
-@api_view(['GET'])
-def tickets(request):
-    return render_to_response('tickets/get_tickets.html')
 
 
 class UserLoginAPIView(APIView):
@@ -166,39 +163,39 @@ def send_message(username, mobile_number):
     print("sending...")
     send_message_timer(username)
     set_message_status(username, "sending")
-    port = serial.Serial("COM4", baudrate=9600, timeout=1)
-    port.write(str.encode('AT' + '\r\n'))
-    rcv = port.read(10)
-    port.write(str.encode('ATE0' + '\r\n'))
-    rcv = port.read(10)
-    print(rcv)
-    port.write(str.encode('AT+CMGF=1' + '\r\n'))
-    rcv = port.read(10)
-    print(rcv)
-    port.write(str.encode('AT+CNMI=2,1,0,0,0' + '\r\n'))
-    rcv = port.read(10)
-    print(rcv)
-    port.write(str.encode('AT+CMGS="+48' + str(mobile_number) + '"' + '\r\n'))
-    rcv = port.read(10)
-    print(rcv)
-    port.write(str.encode('Your authorization code is: ' + authorization_code + '\r\n'))
-    rcv = port.read(10)
-    print(rcv)
-    print(str(check_status(username=username)))
-    if str(check_status(username=username)) != "canceled":
-        port.write(str.encode("\x1A"))
-        for i in range(10):
-            rcv = port.read(10)
-            print(rcv)
-            if reserial(rcv):
-                save_authorization_code(username, authorization_code)
-                status = set_message_status(username, "send")
-                if status:
-                    print(authorization_code)
-                    print("message send")
-                else:
-                    print("Error")
-                break
+    # port = serial.Serial("COM4", baudrate=9600, timeout=1)
+    # port.write(str.encode('AT' + '\r\n'))
+    # rcv = port.read(10)
+    # port.write(str.encode('ATE0' + '\r\n'))
+    # rcv = port.read(10)
+    # print(rcv)
+    # port.write(str.encode('AT+CMGF=1' + '\r\n'))
+    # rcv = port.read(10)
+    # print(rcv)
+    # port.write(str.encode('AT+CNMI=2,1,0,0,0' + '\r\n'))
+    # rcv = port.read(10)
+    # print(rcv)
+    # port.write(str.encode('AT+CMGS="+48' + str(mobile_number) + '"' + '\r\n'))
+    # rcv = port.read(10)
+    # print(rcv)
+    # port.write(str.encode('Your authorization code is: ' + authorization_code + '\r\n'))
+    # rcv = port.read(10)
+    # print(rcv)
+    # print(str(check_status(username=username)))
+    # if str(check_status(username=username)) != "canceled":
+    #     port.write(str.encode("\x1A"))
+    #     for i in range(10):
+    #         rcv = port.read(10)
+    #         print(rcv)
+    #         if reserial(rcv):
+    save_authorization_code(username, authorization_code)
+    status = set_message_status(username, "send")
+    if status:
+        print(authorization_code)
+        print("message send")
+    else:
+        print("Error")
+    # break
 
 
 def get_user_mobile_number(username):
@@ -211,11 +208,7 @@ def get_user_mobile_number(username):
         return False
 
 
-@api_view(['GET'])
 def order_tickets(request):
-    # rcv = str(b'AT\r\r\nOK\r\n')
-    # send = reserial(rcv)
-    # if send:
     if request.user.is_authenticated:
         username = request.user.username
         print(username)
@@ -223,8 +216,8 @@ def order_tickets(request):
         if mobile_number:
             thread = Thread(target=send_message, args=(username, mobile_number))
             thread.start()
-            return Response({"status": HTTP_200_OK})
-    return Response({"status": HTTP_500_INTERNAL_SERVER_ERROR})
+            return HttpResponse({"status": HTTP_200_OK})
+    return HttpResponse({"status": HTTP_500_INTERNAL_SERVER_ERROR})
 
 
 @api_view(['GET'])
@@ -266,6 +259,7 @@ def update_seats_left(seats_ordered, date, band):
     return False
 
 
+# authorize again #
 @api_view(['POST'])
 def authorize(request):
     if request.user.is_authenticated:
@@ -308,5 +302,5 @@ class AdminAuthorizeAPIView(APIView):
 
 @api_view(['GET'])
 def get_logout(request):
-    django_logout(request)
+    logout(request)
     return index(request)
