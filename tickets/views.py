@@ -306,10 +306,7 @@ class AdminAuthorizeAPIView(APIView):
         return Response({"status": 200, "result": False, "message": "Permission denied"}, status=HTTP_200_OK)
 
 
-class UserLogOutAPIView(APIView):
-    template_name = 'login/login_page.html'
-
-    @login_required
-    def get_logout(self, request):
-        django_logout(request)
-        return HttpResponseRedirect(self.template_name)
+@api_view(['GET'])
+def get_logout(request):
+    django_logout(request)
+    return index(request)
