@@ -65,9 +65,7 @@ function get_concerts() {
     });
 }
 
-$(document).ready(function (e) {
-    get_concerts()
-});
+
 
 
 function ticket_details() {
@@ -114,7 +112,6 @@ function price_total() {
 }
 
 function authorize_order() {
-    console.log("authorize");
     $.ajax({
         type: "GET",
         url: "tickets/buy/buy_tickets",
@@ -130,12 +127,18 @@ function authorize_order() {
 
 function accept_tickets() {
     authorize_order();
-    $("#seats_ordered").val(seats_field());
-    $("#date_order").val($("#date-" + row_number).text());
+    $("#location_ordered").val($("#Location-" + row_number).text());
+    console.log($("#location_ordered").val($("#Location-" + row_number).text()));
     $("#event_type_order").val($("#event_type-" + row_number).text());
-    $("#buy-ticket-form").hide();
+    $("#seats_bought").val(seats_field());
+    $("#price_order").val(parseInt($("#price-" + row_number).text()));
+    $("#date_order").val($("#date-" + row_number).text());
+
     $("#seats-chosen").html("<p2> Number of seats: " + seats_field() + "" +
         "<br> Price Total: $" + price_total() + "</p2>").show();
+
+    $("#buy-ticket-form").hide();
+
     $("#enter-authorization-code").animate({opacity: "toggle"}, "slow").show();
 }
 
@@ -151,7 +154,6 @@ function remove_ticket() {
 $("#accept-code-button").click(function (e) {
     e.preventDefault();
     var form = $('#authorization-form');
-    console.log(form.serialize());
     $.ajax({
         type: "POST",
         url: "tickets/buy/buy_tickets/authorize",
@@ -232,3 +234,14 @@ function off() {
     $("#center-details-container").hide();
     $("#center-buy_ticket-container").hide();
 }
+
+
+    $(document).ready(function (e) {
+        get_concerts();
+        $("#search").on("keyup", function() {
+            var value = $(this).val().toLowerCase();
+            $("#display-concerts-tbody tr").filter(function() {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+            });
+        });
+    });

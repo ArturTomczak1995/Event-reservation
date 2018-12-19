@@ -10,13 +10,13 @@ class MobileNumber(models.Model):
         return self.user.username + ' - ' + str(self.mobile_number)
 
 
-class Concerts(models.Model):
-    date = models.DateField()
+class OrderedTicket(models.Model):
+    username = models.ForeignKey(User, on_delete=models.CASCADE)
+    date = models.DateTimeField()
     location = models.CharField(max_length=100)
     event_type = models.CharField(max_length=100)
-    price = models.IntegerField()
-    seats_total = models.IntegerField(default=0)
-    seats_left = models.IntegerField(default=0)
+    price = models.FloatField()
+    seats_bought = models.IntegerField(default=0)
 
     def __str__(self):
         return self.location + ' - ' + str(self.date)

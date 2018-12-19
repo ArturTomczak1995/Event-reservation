@@ -11,26 +11,27 @@
 
     <div class="container" id="user-profile">
     <p2>Your tickets:</p2>
-        <table class="table">
+        <table class="table" id="reservations-table">
             <thead>
-            <tr>
+            <tr id="dsada">
                 <th scope="col">#</th>
                 <th scope="col">Location</th>
                 <th scope="col">Event type</th>
                 <th scope="col">Number of seats</th>
                 <th scope="col">Price total[$]</th>
                 <th scope="col">Date</th>
+                <th scope="col">Cancel reservation</th>
             </tr>
             </thead>
-            <tbody>
-            <tr>
-                <th scope="row">1</th>
-                <td>Warsaw</td>
-                <td>Opera</td>
-                <td>5</td>
-                <td>720</td>
-                <td>2019-01-10 21:00</td>
-            </tr>
+            <tbody id="reservations-table">
+{#            <tr>#}
+{#                <th scope="row">1</th>#}
+{#                <td>Warsaw</td>#}
+{#                <td>Opera</td>#}
+{#                <td>5</td>#}
+{#                <td>720</td>#}
+{#                <td>2019-01-10 21:00</td>#}
+{#            </tr>#}
             </tbody>
         </table>
     </div>
@@ -38,5 +39,5 @@
 {% endblock %}
 
 {% block javascript %}
-    <script src="{% static 'js/book_ticket.js' %}"></script>
+    <script src="{% static 'js/user_table.js' %}"></script>
 {% endblock %}

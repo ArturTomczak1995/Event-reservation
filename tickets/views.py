@@ -1,16 +1,19 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse
 from django.shortcuts import render, render_to_response
-from rest_framework.decorators import api_view
-from rest_framework.permissions import AllowAny
+from django.contrib.auth import authenticate, login, logout
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_500_INTERNAL_SERVER_ERROR, \
     HTTP_304_NOT_MODIFIED
-from rest_framework.views import APIView
-from .models import Concerts, SendMessageAgain, User, MessageStatus, AuthorizationCode, MobileNumber
-from .serializers import MobileNumberSerializer, UserSerializer, UserLoginSerializer, \
-    AuthorizationCodeSerializer
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.response import Response
-from django.contrib.auth import authenticate, login, logout
+from rest_framework.views import APIView
+
+from .models import OrderedTicket, SendMessageAgain, User, MessageStatus, AuthorizationCode, MobileNumber
+from .serializers import MobileNumberSerializer, UserSerializer, UserLoginSerializer, \
+    AuthorizationCodeSerializer, OrderedTicketSerializer
+
 from threading import Thread
 from random import randint
 import serial
@@ -34,7 +37,7 @@ def buy_tickets_page(request):
 def get_users(model, username):
     try:
         user_filter = model.objects.filter(username=username)
-        user = user_filter.get()
+        user = user_filter.get().pk
         return user
     except ObjectDoesNotExist:
         return None
@@ -43,8 +46,10 @@ def get_users(model, username):
 @api_view(['POST'])
 def create_user(create_user_request):
     user_serializer = UserSerializer(data=create_user_request.data)
+
     mobile_number_serializer = MobileNumberSerializer(data=create_user_request.data)
     user_serializer.is_valid()
+    print(user_serializer.data)
     mobile_number_serializer.is_valid()
 
     final_dict = {"user": user_serializer.data}
@@ -64,6 +69,7 @@ class UserLoginAPIView(APIView):
 
     def post(self, request):
         data = request.data
+        print(data)
         serializer = UserLoginSerializer(data=data)
         if serializer.is_valid():
             new_data = serializer.data
@@ -243,9 +249,9 @@ def cancel(request):
     return Response({"status": HTTP_400_BAD_REQUEST, "message": "Reservation cannot be canceled"})
 
 
-def update_seats_left(seats_ordered, date, band):
+def update_seats_left(seats_ordered, date, event_type):
     try:
-        concert_filter = Concerts.objects.filter(date=date, band=band)
+        concert_filter = OrderedTicket.objects.filter(date=date, event_type=event_type)
         concert = concert_filter.get()
     except ObjectDoesNotExist:
         print(False)
@@ -261,25 +267,24 @@ def update_seats_left(seats_ordered, date, band):
 
 # authorize again #
 @api_view(['POST'])
+@authentication_classes((SessionAuthentication, BasicAuthentication))
+@permission_classes((IsAuthenticated,))
 def authorize(request):
     if request.user.is_authenticated:
-        username = request.user.username
-        data = request.data
-        serializer = AuthorizationCodeSerializer(data=data)
-        serializer.is_valid()
-        try:
-            authorization_code_entered = serializer["authorization_code"].value
-            seats = int(request.data["seats_ordered"])
-            date = str(request.data["date"])
-            band = str(request.data["band"])
+        username = request.user
+        user = get_users(username=username, model=User)
 
-        except ValueError:
-            return Response({"status": HTTP_400_BAD_REQUEST, "message": "Input code is invalid"})
-        authorization_code = check_authorization_code(username=username)
-        update_seats = update_seats_left(seats_ordered=seats, date=date, band=band)
-        if check_status(username=username) != "sold" and authorization_code_entered != "" and update_seats:
-            if int(authorization_code) == int(authorization_code_entered):
+        authorization_data = {"user": user, "authorization_code": request.data["authorization_code"]}
+        authorization_serializer = AuthorizationCodeSerializer(data=authorization_data)
+
+        event_serializer_cp = request.data.copy()
+        event_serializer_cp["username"] = user
+        order_tickets_cp = OrderedTicketSerializer(data=event_serializer_cp)
+        order_tickets_cp.is_valid()
+        print(order_tickets_cp.errors)
+        if order_tickets_cp.is_valid() and authorization_serializer.is_valid() and check_status(username=username) != "sold":
                 set_message_status(username=username, status="sold")
+                order_tickets_cp.save()
                 return Response({"status": HTTP_200_OK, "message": "Tickets booked"})
     return Response({"status": HTTP_400_BAD_REQUEST, "message": "Input code is invalid"})
 
@@ -304,3 +309,4 @@ class AdminAuthorizeAPIView(APIView):
 def get_logout(request):
     logout(request)
     return index(request)
+

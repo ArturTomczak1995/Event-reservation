@@ -55,10 +55,10 @@ class UserLoginSerializer(serializers.ModelSerializer):
         return data
 
 
-class ConcertsSerializer(serializers.ModelSerializer):
+class OrderedTicketSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Concerts
-        fields = ["date", "location", "band", "price", "seats_left"]
+        model = OrderedTicket
+        fields = '__all__'
 
 
 class AuthorizationCodeSerializer(serializers.ModelSerializer):

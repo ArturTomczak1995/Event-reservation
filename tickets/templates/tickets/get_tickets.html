@@ -64,9 +64,12 @@
                     <form id="authorization-form" enctype="multipart/form-data">
                         {% csrf_token %}
                         <label for="input-authorization-code">Enter the authorization password:</label>
-                        <input type="hidden" id="seats_ordered" name="seats_ordered" value="">
+                        <input type="hidden" id="username_order" name='username' value='{{ request.user.username }}'>
+                        <input type="hidden" id="location_ordered" name="location" value="">
+                        <input type="hidden" id="event_type_order" name="event_type" value="">
+                        <input type="hidden" id="seats_bought" name="seats_bought" value="">
                         <input type="hidden" id="date_order" name="date" value="">
-                        <input type="hidden" id="band_order" name="band" value="">
+                        <input type="number" id="price_order" name="price" value="" style="display: none">
                         <input id="input-authorization-code" name="authorization_code" class="form-control" type="text">
                         <button id="accept-code-button" type="submit" class="btn btn-success auth-code">accept</button>
                     </form>
