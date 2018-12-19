@@ -2,6 +2,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse
 from django.shortcuts import render, render_to_response
 from django.contrib.auth import authenticate, login, logout
+from django.db.models import Sum
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_500_INTERNAL_SERVER_ERROR, \
@@ -85,16 +86,34 @@ class UserLoginAPIView(APIView):
         return render_to_response('login/login_page.html', {"message": self.invalid_login})
 
 
+def get_tickets_left(event, location, event_type, date):
+    seats_reserved = OrderedTicket.objects.filter(location=location, event_type=event_type, date=date).aggregate(Sum('seats_bought'))
+    seats = int(event["seats_left"])
+    seats_bought = seats_reserved["seats_bought__sum"]
+    if not seats_bought:
+        seats_bought = 0
+    event["seats_left"] = seats - seats_bought
+    return event
+
+
 @api_view(['GET'])
 def get_events(request):
     url = ip_events + get_events_path
     serialized_data = requests.get(url)
+
     data = json.loads(serialized_data.text)
-    events = data["events"]
-    if serialized_data.status_code == 200:
-        return Response(events)
-    else:
+    try:
+        events = data["events"]
+        for event in events:
+            location = event["Location"]
+            event_type = event["event_type"]
+            date = event["date"]
+            get_tickets_left(event=event, location=location, event_type=event_type, date=date)
+        if serialized_data.status_code == 200:
+            return Response(events)
+    except KeyError:
         return Response({"status": HTTP_500_INTERNAL_SERVER_ERROR})
+    return Response({"status": HTTP_500_INTERNAL_SERVER_ERROR})
 
 
 def is_refreshable(username):
@@ -309,4 +328,3 @@ class AdminAuthorizeAPIView(APIView):
 def get_logout(request):
     logout(request)
     return index(request)
-

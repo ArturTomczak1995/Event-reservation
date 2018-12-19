@@ -57,12 +57,16 @@ function get_concerts() {
         url: "login/concerts",
         success: function (data) {
             display_concerts(data);
+            if (data.status === 500){
+                console.log(data);
+            }
         },
         error: function (data) {
             console.log('error');
             console.log(data)
         }
     });
+
 }
 
 
