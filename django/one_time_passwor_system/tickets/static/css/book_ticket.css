@@ -1,0 +1,143 @@
+#concerts-table #thead-tickets {
+    margin: auto;
+}
+
+#authorization-message-end-button {
+    width: 220px;
+    height: 45px;
+}
+
+#tickets-table {
+    padding-top: 150px;
+    width: 70%;
+    margin: auto;
+}
+
+body {
+    /*color: white;*/
+    background: white;
+}
+
+.book-tickets-row td:hover {
+    background-color: yellow;
+}
+
+.tickets-container {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    -webkit-transform: translate(-50%, -50%);
+    -moz-transform: translate(-50%, -50%);
+    -o-transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    z-index: 100;
+
+}
+
+#overlay {
+    position: fixed;
+    display: none;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 2;
+    cursor: pointer;
+}
+
+#buy-ticket-form {
+    cursor: auto;
+    color: black;
+    padding: 20px;
+
+    text-align: center;
+}
+
+#accept-form-button, #cancel-form-button {
+    width: 220px;
+    height: 45px;
+}
+
+#buy_ticket-container, #details-container {
+    background: white;
+    color: black;
+    border-radius: 15px;
+}
+
+#buy-ticket-form-number {
+    margin-left: auto;
+    margin-right: auto;
+    display: inline-block;
+}
+
+#ticket-number, #add-ticket, #remove-ticket {
+    text-align: center;
+    width: 45px;
+    height: 45px;
+    float: left;
+    margin: 10px;
+}
+
+#ticket-number {
+    font-size: 30px;
+}
+
+#enter-authorization-code, #seats-chosen {
+    /*margin-top: 10px;*/
+    display: none;
+}
+
+#enter-authorization-code {
+    text-align: center;
+}
+
+.auth-code {
+    margin: 10px;
+}
+
+#accept-code-button, .order {
+    width: 220px;
+    height: 45px;
+}
+
+#resend-code-button, #cancel-code-button {
+    width: 100px;
+    height: 40px;
+}
+
+#buy-tickets-text {
+    padding-top: 10px;
+    width: 100%;
+    text-align: center;
+}
+
+#authorization-message {
+    padding-bottom: 20px;
+}
+
+#authorization-message-end {
+    display: none;
+    text-align: center;
+    width: 100%;
+    color: green;
+    padding-bottom: 15px;
+}
+
+.padding {
+    padding-bottom: 10px;
+}
+
+#message {
+    display: none;
+    text-align: center;
+    padding: 15px;
+}
+
+#details-container-data {
+    padding-bottom: 10px;
+}
