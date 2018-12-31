@@ -10,18 +10,15 @@ from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_500_IN
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
 from .models import OrderedTicket, SendMessageAgain, User, MessageStatus, AuthorizationCode, MobileNumber
 from .serializers import MobileNumberSerializer, UserSerializer, UserLoginSerializer, \
     AuthorizationCodeSerializer, OrderedTicketSerializer
-
 from threading import Thread
 from random import randint
 import serial
 import datetime
 import requests
 import json
-
 
 ip_events = "https://raw.githubusercontent.com"
 get_events_path = "/ArturTomczak1995/just_json/master/response.json"
@@ -50,7 +47,6 @@ def create_user(create_user_request):
 
     mobile_number_serializer = MobileNumberSerializer(data=create_user_request.data)
     user_serializer.is_valid()
-    print(user_serializer.data)
     mobile_number_serializer.is_valid()
 
     final_dict = {"user": user_serializer.data}
@@ -70,14 +66,12 @@ class UserLoginAPIView(APIView):
 
     def post(self, request):
         data = request.data
-        print(data)
         serializer = UserLoginSerializer(data=data)
         if serializer.is_valid():
             new_data = serializer.data
             username = request.POST["username"]
             password = request.POST["password"]
             user = authenticate(request, username=username, password=password)
-            print(user, username, password)
             if user is not None:
                 login(request, user=user)
                 return render(request, self.template_name, new_data, status=HTTP_200_OK)
@@ -87,7 +81,8 @@ class UserLoginAPIView(APIView):
 
 
 def get_tickets_left(event, location, event_type, date):
-    seats_reserved = OrderedTicket.objects.filter(location=location, event_type=event_type, date=date).aggregate(Sum('seats_bought'))
+    seats_reserved = OrderedTicket.objects.filter(location=location, event_type=event_type, date=date).aggregate(
+        Sum('seats_bought'))
     seats = int(event["seats_left"])
     seats_bought = seats_reserved["seats_bought__sum"]
     if not seats_bought:
@@ -185,42 +180,29 @@ def generate_random():
 
 def send_message(username, mobile_number):
     authorization_code = str(generate_random())
-    print("sending...")
     send_message_timer(username)
     set_message_status(username, "sending")
-    # port = serial.Serial("COM4", baudrate=9600, timeout=1)
-    # port.write(str.encode('AT' + '\r\n'))
-    # rcv = port.read(10)
-    # port.write(str.encode('ATE0' + '\r\n'))
-    # rcv = port.read(10)
-    # print(rcv)
-    # port.write(str.encode('AT+CMGF=1' + '\r\n'))
-    # rcv = port.read(10)
-    # print(rcv)
-    # port.write(str.encode('AT+CNMI=2,1,0,0,0' + '\r\n'))
-    # rcv = port.read(10)
-    # print(rcv)
-    # port.write(str.encode('AT+CMGS="+48' + str(mobile_number) + '"' + '\r\n'))
-    # rcv = port.read(10)
-    # print(rcv)
-    # port.write(str.encode('Your authorization code is: ' + authorization_code + '\r\n'))
-    # rcv = port.read(10)
-    # print(rcv)
-    # print(str(check_status(username=username)))
-    # if str(check_status(username=username)) != "canceled":
-    #     port.write(str.encode("\x1A"))
-    #     for i in range(10):
-    #         rcv = port.read(10)
-    #         print(rcv)
-    #         if reserial(rcv):
-    save_authorization_code(username, authorization_code)
-    status = set_message_status(username, "send")
-    if status:
-        print(authorization_code)
-        print("message send")
-    else:
-        print("Error")
-    # break
+    port = serial.Serial("COM4", baudrate=9600, timeout=1)
+    port.write(str.encode('AT' + '\r\n'))
+    port.write(str.encode('ATE0' + '\r\n'))
+    port.write(str.encode('AT+CMGF=1' + '\r\n'))
+    port.write(str.encode('AT+CNMI=2,1,0,0,0' + '\r\n'))
+    port.write(str.encode('AT+CMGS="+48' + str(mobile_number) + '"' + '\r\n'))
+    port.write(str.encode('Your authorization code is: ' + authorization_code + '\r\n'))
+    print(str(check_status(username=username)))
+    if str(check_status(username=username)) != "canceled":
+        port.write(str.encode("\x1A"))
+        for i in range(10):
+            rcv = port.read(10)
+            if reserial(rcv):
+                save_authorization_code(username, authorization_code)
+                status = set_message_status(username, "send")
+                if status:
+                    print(authorization_code)
+                    print("message send")
+                else:
+                    print("Error")
+                    break
 
 
 def get_user_mobile_number(username):
@@ -273,7 +255,6 @@ def update_seats_left(seats_ordered, date, event_type):
         concert_filter = OrderedTicket.objects.filter(date=date, event_type=event_type)
         concert = concert_filter.get()
     except ObjectDoesNotExist:
-        print(False)
         return False
     seats_left = concert.seats_left
     seats_updated = seats_left - seats_ordered
@@ -284,7 +265,6 @@ def update_seats_left(seats_ordered, date, event_type):
     return False
 
 
-# authorize again #
 @api_view(['POST'])
 @authentication_classes((SessionAuthentication, BasicAuthentication))
 @permission_classes((IsAuthenticated,))
@@ -301,10 +281,11 @@ def authorize(request):
         order_tickets_cp = OrderedTicketSerializer(data=event_serializer_cp)
         order_tickets_cp.is_valid()
         print(order_tickets_cp.errors)
-        if order_tickets_cp.is_valid() and authorization_serializer.is_valid() and check_status(username=username) != "sold":
-                set_message_status(username=username, status="sold")
-                order_tickets_cp.save()
-                return Response({"status": HTTP_200_OK, "message": "Tickets booked"})
+        if order_tickets_cp.is_valid() and authorization_serializer.is_valid() and check_status(
+                username=username) != "sold":
+            set_message_status(username=username, status="sold")
+            order_tickets_cp.save()
+            return Response({"status": HTTP_200_OK, "message": "Tickets booked"})
     return Response({"status": HTTP_400_BAD_REQUEST, "message": "Input code is invalid"})
 
 
