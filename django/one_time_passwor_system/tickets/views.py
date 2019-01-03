@@ -111,11 +111,11 @@ def get_events(request):
     return Response({"status": HTTP_500_INTERNAL_SERVER_ERROR})
 
 
-def is_refreshable(username):
+def is_refreshable(username, waiting_time):
     user_filter = User.objects.filter(username=username)
     user = user_filter.get()
     time_send = SendMessageAgain.objects.filter(user=user).last().time_received
-    refresh_interval = (datetime.datetime.now() - datetime.timedelta(seconds=30)).time()
+    refresh_interval = (datetime.datetime.now() - datetime.timedelta(seconds=waiting_time)).time()
     if refresh_interval > time_send:
         return True
     else:
@@ -231,7 +231,7 @@ def order_tickets(request):
 def refresh(request):
     if request.user.is_authenticated:
         username = request.user.username
-        can_refresh = is_refreshable(username=username)
+        can_refresh = is_refreshable(username=username, waiting_time=30)
         timer = send_message_timer(username=username)
         mobile_number = get_user_mobile_number(username)
         if can_refresh and timer and mobile_number:
@@ -275,14 +275,14 @@ def authorize(request):
 
         authorization_data = {"user": user, "authorization_code": request.data["authorization_code"]}
         authorization_serializer = AuthorizationCodeSerializer(data=authorization_data)
-
+        code_is_valid = is_refreshable(username=username, waiting_time=120)
         event_serializer_cp = request.data.copy()
         event_serializer_cp["username"] = user
         order_tickets_cp = OrderedTicketSerializer(data=event_serializer_cp)
         order_tickets_cp.is_valid()
         print(order_tickets_cp.errors)
         if order_tickets_cp.is_valid() and authorization_serializer.is_valid() and check_status(
-                username=username) != "sold":
+                username=username) != "sold" and not code_is_valid:
             set_message_status(username=username, status="sold")
             order_tickets_cp.save()
             return Response({"status": HTTP_200_OK, "message": "Tickets booked"})
