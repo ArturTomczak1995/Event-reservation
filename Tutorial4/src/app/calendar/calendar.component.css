@@ -1,0 +1,55 @@
+.days-row {
+  float: left;
+  width: 200px;
+  height: 110px;
+}
+
+#days-calendar {
+  padding: 5px;
+  border: solid 1px dodgerblue;
+}
+
+.days {
+  float: left;
+}
+
+.trash {
+  float: left;
+}
+
+#days-name {
+  padding: 5px;
+  border: 1px darkgray solid;
+  background-color: gray;
+  text-align: center;
+  vertical-align: middle;
+  line-height: 110px;
+  font-size: 2em;
+}
+
+.days-inactive {
+  color: gray;
+}
+
+#days-calendar:hover {
+  background-color: lightskyblue;
+}
+#days-name:hover {
+  background-color: slategrey;
+}
+
+.date-button {
+  margin: 5px;
+}
+#date-buttons-left, #date-buttons-right, #date-month-year{
+  float: left;
+}
+
+#date-month-year{
+  text-align: center;
+  padding: 10px;
+  width: 215px;
+}
+#calendar {
+  width: 80%;
+}

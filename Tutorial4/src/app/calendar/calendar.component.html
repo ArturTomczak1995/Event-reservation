@@ -1,0 +1,44 @@
+<div id="calendar">
+  <div class="date-buttons">
+    <div id="date-buttons-left">
+      <button class="btn btn-light date-button" (click)="changeYear(-1)"><<</button>
+      <button class="btn btn-light date-button" (click)="changeMonth(-1)"><</button>
+    </div>
+    <div id="date-month-year">
+      <h4> {{ monthName }}, {{ currentYear }} </h4>
+    </div>
+    <div id="date-buttons-right">
+      <button class="btn btn-light date-button" (click)="changeMonth(1)">></button>
+      <button class="btn btn-light date-button" (click)="changeYear(1)">>></button>
+    </div>
+  </div>
+
+
+  <div class="days">
+
+    <div class="days-row" id="days-name" *ngFor="let day_name of dayName">
+      {{ day_name }}
+    </div>
+
+    <div *ngFor="let week of weeksArr">
+      <div class="days-row" id="days-calendar" *ngFor="let day of week">
+        <div *ngIf="day.isActive; else inactiveDays" class="days-active">
+          {{ day.i }}
+        </div>
+        <ng-template #inactiveDays>
+          <div class="days-inactive">
+            {{ day.i }}
+          </div>
+        </ng-template>
+
+      </div>
+    </div>
+  </div>
+  <div class="trash">
+    <h1>Day: {{ firstDayOfMonth }}</h1>
+    <h1>Previous m: {{ previousMonthDays }}</h1>
+  </div>
+</div>
+
+
+
